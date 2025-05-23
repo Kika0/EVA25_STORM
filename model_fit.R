@@ -14,7 +14,7 @@ source('target_quantity_helpers.R')
 source('model_diagnostics.R')
 
 ### loading data file
-load('Yrun1Lap 1.rdata')
+load('Yrun.RData')
 Yrun1Lap <- as.data.frame((Yrun1 %>% apply(c(2),FUN=row_number))/(nrow(Yrun1)+1)) %>% apply(c(1,2),FUN=unif_laplace_pit) %>% as.data.frame()
 
 # marginal and conditional fits and data -----
