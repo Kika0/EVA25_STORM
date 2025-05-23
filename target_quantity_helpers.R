@@ -1,5 +1,5 @@
 Q1prel <- function(Yrun) {
-  sum(apply(Yrun,MARGIN=1,FUN=sum)>85)
+  sum(apply(Yrun, MARGIN = 1, FUN = sum) > 85)
 }
 
 Q2prel <- function(Yrun) {
@@ -11,15 +11,32 @@ Q3prel <- function(Yrun) {
 }
 
 Q1 <- function(Yrun,threshold=1.7) {
-  sum(apply(apply(X=Yrun,MARGIN = c(1,2),FUN = function(x){x>threshold}),MARGIN=1,FUN=sum)==25)
+  sum(rowSums(Yrun > threshold) == 25)
 }
 
 Q2 <- function(Yrun,threshold=5.7) {
-  sum(apply(X=apply(X=Yrun,MARGIN = c(1,2),function(x){x>threshold}),MARGIN=1,sum)>=6)
+  sum(rowSums(Yrun > threshold) >= 6)
 }
 
-Q3 <- function(Yrun,threshold=5) {
-  str_count(paste(c(0,0,apply(X=apply(X=Yrun,MARGIN = c(1,2),function(x){x>threshold}),MARGIN=1,sum)>=3,0,0),collapse=""),pattern="110")
+Q3old <- function(Yrun,threshold=5) {
+  str_count(paste(c(0, 0, apply(X = Yrun > threshold, MARGIN = 1, sum) >= 3,0,0),
+            collapse = ""),
+            pattern = "110")
+}
+
+Q3 <- function(Yrun, threshold = 5){
+  ## Number of times at least three sites exceed the threshold
+  excesses <- rowSums(Yrun > threshold) >= 3
+  
+  ## Turn the above into a string of 0's and 1's
+  excesses_string <- paste(as.numeric(excesses), collapse = "")
+  
+  ## Count the number of times a run of two appears
+  ## Method will only count run of more than two 1s once
+  out <- str_count(excesses_string, "1{2,}")
+  
+  ## return the output
+  return(out)
 }
 
 # evaluate all quantities from one run
