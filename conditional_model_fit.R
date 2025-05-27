@@ -125,7 +125,7 @@ sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_mo
   final_uniform_data <- as.data.frame(final_uniform_data)
   
 # reorder the data
-ordering <- rank(rowSums(apply(Y_boot$X, 2, rank)) ## Y_boot$X blocked bootstrapped data
+ordering <- rank(rowSums(apply(Y_boot$X, 2, rank))) ## Y_boot$X blocked bootstrapped data
 
 final_uniform_data <- final_uniform_data[ordering,] ## reorder for temporal ordering
 
