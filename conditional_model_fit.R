@@ -135,7 +135,7 @@ Data_orig_margins <- sapply(1:25, function(i){
                       gpd_par = list(u = Y_boot$par[i,1:3],
                                      scale = Y_boot$par[i,4:6],
                                      shape = Y_boot$par[i,7])))
-                    }
+                    })
   
   names(Data_orig_margin) <- names(Data_Final_Laplace_Margins)
   
