@@ -30,6 +30,8 @@ model_refit <- function(k) {
 source("Block_Bootstrapping.R")
 Yboot <- Y_Bootstrapped[[1]]
 Yboot$Y[Yboot$Y==Inf] <- 11
+names(Yboot$Y) <- paste0("Y",1:25)
+Yboot$Y <- as.data.frame(Yboot$Y)
   cond_model_fit_wrapper = function(i){
     return(fn(site_index=i,v=q,Yrun=Yboot$Y,res_dist = "AGG_vinecopula"))
   }
