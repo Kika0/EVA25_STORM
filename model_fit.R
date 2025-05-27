@@ -31,20 +31,20 @@ model_refit <- function(k) {
 source("Block_Bootstrapping.R")
 Yboot <- Y_Bootstrapped[[1]]
   cond_model_fit_wrapper = function(i){
-    return(fn(site_index=i,v=q,Yrun=Yboot,res_dist = "AGG_vinecopula"))
+    return(fn(site_index=i,v=q,Yrun=Yboot$Y,res_dist = "AGG_vinecopula"))
   }
   cond_modelvc1 <- sapply(1:25,cond_model_fit_wrapper,simplify=FALSE)
   
   Nrun <- 50
   # simulate from cond. model with AGG_vinecopula residuals
-  boot <- replicate(n = Nrun, expr = sim_cond_model(Yrun=Yboot,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula"), simplify = FALSE)
+  boot <- replicate(n = Nrun, expr = sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula",Y_boot=Yboot), simplify = FALSE)
   # evaluate target quantities for all 6 questions (preliminary+target)
   tq <- do.call(rbind,lapply(bootemp,FUN = Qeval))
   # sum and divide by Nrun
   temp <- apply(tq,MARGIN=2,FUN=sum)/Nrun
 
   # simulate from cond.model with empirical residuals
-  bootemp <- replicate(n = Nrun, expr = sim_cond_model(Yrun=Ybootemp,cond_model=cond_modelvc1e,res_dist = "empirical"), simplify = FALSE)
+  bootemp <- replicate(n = Nrun, expr = sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1e,res_dist = "empirical",Y_boot=Yboot), simplify = FALSE)
   # evaluate target quantities for all 6 questions (preliminary+target)
   tq <- do.call(rbind,lapply(boot,FUN = Qeval))
   # sum and divide by Nrun
