@@ -1,32 +1,3 @@
-################################################################################
-#Load in required packages
-rm(list = ls())
-required_pckgs <- c("dplyr", "evd", "ggplot2", "gtools", "LaplacesDemon", "parallel", "purrr", "quantreg", "rvinecopulib", "tidyverse", "tidyr")
-# install.packages(required_pckgs, dependencies = TRUE, Ncpus = detectCores() - 1)
-t(t(sapply(required_pckgs, require, character.only = TRUE)))
-
-################################################################################
-## Loading in required scripts
-
-#source("Aiden/automated_threshold_selection/src/helper_functions.R")
-source("Aiden/NonSta_GPD_Functions.R")
-source("Aiden/NonSta_GPD_Fitting.R")
-
-source("kristina/cond_model_helpers.R")
-source("kristina/cond_model_fit.R")
-source("kristina/target_quantity_helpers.R")
-
-# source("kristina/model_diagnostics.R")
-# load("kristina/cond_modelvc.RData")
-
-################################################################################
-## Load in data and format into data frame
-
-load("runs/run1.RData")
-load("runs/run2.RData")
-load("runs/run3.RData")
-load("runs/run4.RData")
-
 ## Combine the runs into a single data frame
 d <- dim(run1)[1]
 n_grid <- d*d
