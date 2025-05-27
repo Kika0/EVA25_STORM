@@ -64,9 +64,9 @@ Yboot$Y <- as.data.frame(Yboot$Y)
 
 d = 25
 q = 0.95 # quantile threshold for fitting the conditional model
-Nboot = 100
+Nboot = 1
 # model_refit(1)
-param_bootstrap = mclapply(1:Nboot, model_refit, mc.cores = 100)
+param_bootstrap = mclapply(1:Nboot, model_refit, mc.cores = 1)
 
 # save results -----
-save(param_bootstrap, file = "param_bootstrap3.RData")
+save(param_bootstrap, file = "param_bootstrap2.RData")
