@@ -26,63 +26,7 @@ fn <- function(site_index=1,v=0.95,Yrun=Yrun1,res_dist="empirical") {
   }
 }
 
-fn1 <- function(site_index=1,v=0.95,Yrun=Yrun1) {
-  # transform to Laplace margins
-  Yrun <- as.data.frame((Yrun %>% apply(c(2),FUN=row_number))/(nrow(Yrun)+1)) %>% apply(c(1,2),FUN=unif_laplace_pit) %>% as.data.frame()
-  j <- site_index
-  pe_cond1 <- par_est(df=Yrun,v=v,given=j,keef_constraints = c(1,2))
-  # calculate a vector of observed residuals
-  Z_hat <- function(Yi, Y_i, a, b){
-    Z <- (Y_i - a*Yi)/(Yi^b)
-  }
-  
-  Y_given1extreme <- Yrun %>% filter(Yrun[,j]>quantile(Yrun[,j],v))
-  Y_given1extreme_list <- lapply(apply(Y_given1extreme, 2, list),
-                                 function(x){x[[1]]})
-  
-  Z_new <- do.call(cbind, pmap(.f = Z_hat,
-                               .l = list(Y_i = Y_given1extreme_list[-j],
-                                         a = pe_cond1$a,
-                                         b = pe_cond1$b),
-                               Yi = Y_given1extreme_list[[j]]))
-  Z_new <- as.data.frame(Z_new)
-  names(Z_new) <- paste0("Z",c(1:ncol(Y_given1extreme))[-j])
-  return(list(pe_cond1,Z_new))
-}
-
-
-
-#' Shifting the data by tau days
-#'
-#' @param sims A dataframe with columns as variables
-#' @param cond_site 
-#' @param tau 
-#' @param Ndays_season 
-#'
-#' @return
-#' @export
-#'
-#' @examples
-shift_time <- function(sims=sims,cond_site=cond_site,tau=0, Ndays_season = nrow(sims)) {
-  if (tau==0) {
-    return(sims)
-  }
-  dayshift <- c(-3:3)
-  Nyears <- nrow(sims)/Ndays_season
-  dayremove <- c(rep(Ndays_season,3),0,1,2,3)-c(2,1,rep(0,5))
-  daysremove_condsite <- daysremove_othersites <-  c()
-  daysremove_condsite <- as.numeric(sapply(1:Nyears,function(i){append(daysremove_condsite,dayremove[dayshift %in% (0:-tau)[-1]]+Ndays_season*(i-1))}))
-  daysremove_othersites <- as.numeric(sapply(1:Nyears,function(i){append(daysremove_othersites,dayremove[dayshift %in% (0:tau)[-1]]+Ndays_season*(i-1))}))
-  
-  sims_tau <-  data.frame(matrix(ncol=ncol(sims),nrow=nrow(sims)-abs(tau)*Nyears))
-  names(sims_tau) <- names(sims)
-  sims_tau[,cond_site] <- sims[-daysremove_condsite,cond_site]
-  sims_tau[,-cond_site] <- sims[-daysremove_othersites,-cond_site]
-  return(sims_tau)
-}
-
-
-sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,gpd_par=gpd_par1,res_dist="empirical",cond_model=cond_model) {
+sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_model=cond_model,Y_boot=Yboot) {
   ## Reading in required packages
   v <- qlaplace(q)
   Nsim <- sum(apply(Yrun1Lap, 1, max) > v)*Nrun
@@ -173,18 +117,22 @@ sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,gpd_par=gpd_par1,res_dist="e
                                       Final_Laplace_Samples)
   
   final_uniform_data <- apply(X=Data_Final_Laplace_Margins,MARGIN=2,plaplace)
+  final_uniform_data <- as.data.frame(final_uniform_data)
   
-  # reorder the data by sum of ranks of Yrun
-  final_uniform_data <- as.data.frame(final_uniform_data[rank(Yrun[,13]),])
-  mu <- as.numeric(unlist(gpd_par[,1]))
-  sig <- as.numeric(unlist(gpd_par[,2]))
-  xi <- as.numeric(unlist(gpd_par[,3]))
-  v_margin <- 0.95
-  qspliced_wrapper = function(i){
-    return(qspliced_v_fast(p=as.numeric(unlist(final_uniform_data[,i])), x=as.numeric(unlist(Yrun[,i])), q=v_margin, gpd_par=c(sig[i], xi[i])))
-  }
+# reorder the data
+ordering <- rank(rowSums(apply(Y_boot$X, 2, rank)) ## Y_boot$X blocked bootstrapped data
+
+final_uniform_data <- final_uniform_data[ordering,] ## reorder for temporal ordering
+
+## Obtain the data on the original margins
+Data_orig_margins <- sapply(1:25, function(i){
+    qspliced_nonsta(p = final_uniform_data[,i],
+                      t = 1:nrow(final_uniform_data,
+                      x = Y_boot$X[,i],
+                      gpd_par = list(u = Y_boot$par[i,1:3],
+                                     scale = Y_boot$par[i,4:6],
+                                     shape = Y_boot$par[i,7])
   
-  Data_orig_margin <- as.data.frame(sapply(1:25, qspliced_wrapper))
   names(Data_orig_margin) <- names(Data_Final_Laplace_Margins)
   
   return(Data_orig_margin)
