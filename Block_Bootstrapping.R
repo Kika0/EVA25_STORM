@@ -34,7 +34,7 @@ data$Grid_1 <- factor(data$Grid_1, levels = 1:d, labels = 1:d)
 data$Grid_2 <- factor(data$Grid_2, levels = 1:d, labels = 1:d)
 # data$Value <- as.numeric(data$Value)
 ################################################################################
-
+## Function to block bootstrap from the non-stationary GPD
 NonSta_GPD_to_Lapalce <- function(df, run, tau, B, l){
   
   ## Filter the data to the run of choice
@@ -170,7 +170,9 @@ NonSta_GPD_to_Lapalce <- function(df, run, tau, B, l){
     Par_Boot <- t(sapply(Marginal_Fits_Boot, function(x){
       c(x$par$beta_u, x$par$beta_scale, x$par$shape)})) 
     
-    return(list(Y = Y_Boot,
+    return(list(X = matrix(data_boot_long$Value, ncol = length(grid_list)),
+                Y = Y_Boot,
+                t = data_boot$Time,
                 par = Par_Boot))
   }
   
