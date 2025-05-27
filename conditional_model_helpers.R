@@ -156,7 +156,7 @@ par_est <- function(df=sims,v=0.99,given=c(1),margin="Normal",method="sequential
   names(df) <- paste0("Y",1:ncol(df))
   d <- ncol(df)
   for (j in given) {
-    Y_given1extreme <- df %>% filter(df[,j]>quantile(df[,j],v))
+    Y_given1extreme <- df %>% dplyr::filter(df[,j]>quantile(df[,j],v))
     res <- c(1:d)[-j]
     init_par <- c()
     init_lik <- c()

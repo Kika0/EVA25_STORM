@@ -2,7 +2,7 @@ fn <- function(site_index=1,v=0.95,Yrun1Lap=Yboot$Y,res_dist="empirical") {
   j <- site_index
   pe_cond1 <- par_est(df=Yrun1Lap,v=v,given=j,keef_constraints = c(1,2))
   # calculate a vector of observed residuals
-  Y_given1extreme <- Yrun1Lap %>% filter(Yrun1Lap[,j]>quantile(Yrun1Lap[,j],v))
+  Y_given1extreme <- Yrun1Lap %>% dplyr::filter(Yrun1Lap[,j]>quantile(Yrun1Lap[,j],v))
   Z <- as.data.frame(matrix(nrow=nrow(Y_given1extreme),ncol=0))
   Y1 <- Y_given1extreme[,j]
   res <- c(1:ncol(Y_given1extreme))[-j]
