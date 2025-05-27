@@ -29,6 +29,7 @@ load("runs/run4.RData")
 model_refit <- function(k) {
 source("Block_Bootstrapping.R")
 Yboot <- Y_Bootstrapped[[1]]
+Yboot$Y[Yboot$Y==Inf] <- 11
   cond_model_fit_wrapper = function(i){
     return(fn(site_index=i,v=q,Yrun=Yboot$Y,res_dist = "AGG_vinecopula"))
   }
