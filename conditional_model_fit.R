@@ -20,8 +20,13 @@ fn <- function(site_index=1,v=0.95,Yrun=Yrun1,res_dist="empirical") {
   if (res_dist=="AGG_vinecopula") {
     # 3a. estimate parameters for AGG residual margins
     res_margin <- res_margin_par_est(obs_res=Z,method = "AGG")
+    # transform to AGG margins
+    pAGG_wrapper <- function (i) {
+      pAGG(x=Z[i],theta=as.numeric(unlist(res_margin[i,2:6])))
+    }
+    Z_AGG <- sapply(1:ncol(Z),FUN=pAGG_wrapper)
     # 3b. fit a vine copula
-    res_vc <- rvinecopulib::vinecop( (Z %>% apply(c(2),FUN=row_number))/(nrow(Yrun1Lap)*(1-v)+1),selcrit = "mbicv")  
+    res_vc <- rvinecopulib::vinecop( Z_AGG,selcrit = "mbicv")  
     return(list(pe_cond1,Z,res_margin,res_vc))
   }
 }
