@@ -1,6 +1,4 @@
-fn <- function(site_index=1,v=0.95,Yrun=Yrun1,res_dist="empirical") {
-  # transform to Laplace margins
-  Yrun1Lap <- as.data.frame((Yrun %>% apply(c(2),FUN=row_number))/(nrow(Yrun)+1)) %>% apply(c(1,2),FUN=unif_laplace_pit) %>% as.data.frame()
+fn <- function(site_index=1,v=0.95,Yrun1Lap=Yboot$Y,res_dist="empirical") {
   j <- site_index
   pe_cond1 <- par_est(df=Yrun1Lap,v=v,given=j,keef_constraints = c(1,2))
   # calculate a vector of observed residuals
@@ -34,7 +32,7 @@ fn <- function(site_index=1,v=0.95,Yrun=Yrun1,res_dist="empirical") {
 sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_model=cond_model,Y_boot=Yboot) {
   ## Reading in required packages
   v <- qlaplace(q)
-  Nsim <- sum(apply(Yrun1Lap, 1, max) > v)*Nrun
+  Nsim <- sum(apply(Yboot$Y, 1, max) > v)*Nrun
   n_sim <- Nsim*10
   required_pckgs <- c("Matrix", "LaplacesDemon")
   t(t(sapply(required_pckgs, require, character.only = TRUE)))
