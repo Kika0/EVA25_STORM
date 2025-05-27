@@ -6,6 +6,9 @@ library(evd)
 library(rvinecopulib)
 library(tidyverse)
 library(VGAM)
+library(gtools)
+library(purrr)
+library(quantreg)
 
 # function scripts ------
 source('conditional_model_helpers.R')
