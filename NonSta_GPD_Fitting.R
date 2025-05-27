@@ -48,8 +48,19 @@ Loglike_GPD_Seaonsal_Scale <- function(par, x, t, negative = FALSE){
   scale <- exp(Model_Year(t = t, beta_1 = par[1], beta_2 = par[2], beta_3 = par[3]))
   shape <- par[4]
   
-  ## Calculate the log-likelihood
-  z <- sum(-log(scale) - (1 + 1/shape)*log(pmax(0, 1 + shape*(x/scale))))
+  if(shape < 0){
+    if(any(1 + shape*x/scale <= 0)){
+      return((-10^10)*(-1)^negative)
+    }
+  }
+  
+  if(abs(shape) <= 1e-10){
+    z <- sum(-log(scale) - log(x/scale)) 
+  }
+  else{
+    ## Calculate the log-likelihood
+    z <- sum(-log(scale) - (1 + 1/shape)*log(pmax(0, 1 + shape*(x/scale)))) 
+  }
   
   ## Check the output
   if(is.na(z) | is.nan(z) | is.infinite(z)){

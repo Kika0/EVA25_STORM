@@ -1,13 +1,34 @@
-Q1prel <- function(Yrun) {
-  sum(apply(Yrun, MARGIN = 1, FUN = sum) > 85)
+Q1prel <- function(Yrun, threshold = 85) {
+  sum(rowSums(Yrun) > threshold)
 }
 
-Q2prel <- function(Yrun) {
-  sum(apply(X=apply(X=Yrun %>% dplyr::select(all_of(c(1,6,11,16,21))),MARGIN = c(1,2),function(x){x>4.3}),MARGIN=1,sum)>=3)
+# Q2prel <- function(Yrun) {
+#   sum(apply(X=apply(X=Yrun %>% dplyr::select(all_of(c(1,6,11,16,21))),MARGIN = c(1,2),function(x){x>4.3}),MARGIN=1,sum)>=3)
+# }
+
+Q2prel <- function(Yrun, threshold = 4.3) {
+  sum(rowSums(Yrun %>% dplyr::select(all_of(c(1,6,11,16,21))) > threshold) >= 3)
+  
 }
 
-Q3prel <- function(Yrun) {
-  str_count(paste(c(0,0,apply(X=apply(X=Yrun %>% dplyr::select(all_of(c(1,6,11,16,21))),MARGIN = c(1,2),function(x){x>2.5}),MARGIN=1,sum)>=3,0,0),collapse=""),pattern="110")
+# Q3prel <- function(Yrun) {
+#   str_count(paste(c(0,0,apply(X=apply(X=Yrun %>% dplyr::select(all_of(c(1,6,11,16,21))),MARGIN = c(1,2),function(x){x>2.5}),MARGIN=1,sum)>=3,0,0),collapse=""),pattern="110")
+# }
+
+Q3prel <- function(Yrun, threhsold = 2.5){
+  
+  ## Obtain the excesses for the chosen site
+  excesses <- rowSums(Yrun %>% dplyr::select(all_of(c(1,6,11,16,21))) > threshold) >= 3
+  
+  ## Turn the above into a string of 0's and 1's
+  excesses_string <- paste(as.numeric(excesses), collapse = "")
+  
+  ## Count the number of times a run of two appears
+  ## Method will only count run of more than two 1s once
+  out <- str_count(excesses_string, "1{2,}")
+  
+  ## return the output
+  return(out)
 }
 
 Q1 <- function(Yrun,threshold=1.7) {
