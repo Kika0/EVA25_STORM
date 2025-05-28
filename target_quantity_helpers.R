@@ -15,7 +15,7 @@ Q2prel <- function(Yrun, threshold = 4.3) {
 #   str_count(paste(c(0,0,apply(X=apply(X=Yrun %>% dplyr::select(all_of(c(1,6,11,16,21))),MARGIN = c(1,2),function(x){x>2.5}),MARGIN=1,sum)>=3,0,0),collapse=""),pattern="110")
 # }
 
-Q3prel <- function(Yrun, threhsold = 2.5){
+Q3prel <- function(Yrun, threshold = 2.5){
   
   ## Obtain the excesses for the chosen site
   excesses <- rowSums(Yrun %>% dplyr::select(all_of(c(1,6,11,16,21))) > threshold) >= 3

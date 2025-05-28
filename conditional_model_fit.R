@@ -31,6 +31,7 @@ fn <- function(site_index=1,v=0.95,Yrun1Lap=Yboot$Y,res_dist="empirical") {
 
 sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_model=cond_model,Y_boot=Yboot) {
   ## Reading in required packages
+  d <- 25
   v <- qlaplace(q)
   Nsim <- sum(apply(Yboot$Y, 1, max) > v)*Nrun
   n_sim <- Nsim*10
@@ -120,7 +121,7 @@ sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_mo
                                       Final_Laplace_Samples)
   
   final_uniform_data <- apply(X=Data_Final_Laplace_Margins,MARGIN=2,plaplace)
-  final_uniform_data <- as.data.frame(final_uniform_data)
+  #final_uniform_data <- as.data.frame(final_uniform_data)
   
 # reorder the data
 ordering <- rank(rowSums(apply(Y_boot$X, 2, rank))) ## Y_boot$X blocked bootstrapped data
@@ -130,16 +131,16 @@ final_uniform_data <- final_uniform_data[ordering,] ## reorder for temporal orde
 ## Obtain the data on the original margins
 Data_orig_margins <- sapply(1:25, function(i){
     qspliced_nonsta(p = final_uniform_data[,i],
-                      t = 1:nrow(final_uniform_data,
+                      t = 1:nrow(final_uniform_data),
                       x = Y_boot$X[,i],
                       gpd_par = list(u = Y_boot$par[i,1:3],
                                      scale = Y_boot$par[i,4:6],
-                                     shape = Y_boot$par[i,7])))
+                                     shape = Y_boot$par[i,7]))
                     })
   
-  names(Data_orig_margin) <- names(Data_Final_Laplace_Margins)
+ # names(Data_orig_margins) <- names(Data_Final_Laplace_Margins)
   
-  return(Data_orig_margin)
+  return(as.data.frame( Data_orig_margins))
   #  return(final_uniform_data)
 }
 
