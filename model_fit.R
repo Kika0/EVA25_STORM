@@ -88,11 +88,8 @@ names(temp) <- names(tq[[1]])
   tq_table <- cbind(data.frame("Residual method" = c("empirical","vine copula")),
                     rbind(temp,tvc))
 
-  # try model diagnostics
-  diag1 <- Q1diag(sims1=boot,sims2=bootemp)
-  diag2 <- Q2diag(sims1=boot,sims2=bootemp)
-  diag3 <- Q3diag(sims1=boot,sims2=bootemp)
-  return(list(tq_table,diag1,diag2,diag3))
+  # maybe add model diagnostics
+  return(list(tq_table))
 }
 
 d = 25
