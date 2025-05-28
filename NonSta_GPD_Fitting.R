@@ -55,7 +55,7 @@ Loglike_GPD_Seaonsal_Scale <- function(par, x, t, negative = FALSE){
   }
   
   if(abs(shape) <= 1e-10){
-    z <- sum(-log(scale) - log(x/scale)) 
+    z <- sum(-log(scale) - x/scale)
   }
   else{
     ## Calculate the log-likelihood
