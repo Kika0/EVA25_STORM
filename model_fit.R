@@ -36,7 +36,7 @@ Yboot$Y <- as.data.frame(Yboot$Y)
   }
   cond_modelvc1 <- sapply(1:25,cond_model_fit_wrapper,simplify=FALSE)
   
-  Nrun <- 50
+  Nrun <- 200
   # # simulate from cond. model with AGG_vinecopula residuals
   # boot <- replicate(n = Nrun, expr = sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula",Y_boot=Yboot), simplify = FALSE)
   # # evaluate target quantities for all 6 questions (preliminary+target)
@@ -94,9 +94,9 @@ names(temp) <- names(tq[[1]])
 
 d = 25
 q = 0.95 # quantile threshold for fitting the conditional model
-Nboot = 1
+Nboot = 100
 # model_refit(1)
-param_bootstrap = mclapply(1:Nboot, model_refit, mc.cores = 1)
+param_bootstrap = mclapply(1:Nboot, model_refit, mc.cores = 100)
 
 # save results -----
-save(param_bootstrap, file = "param_bootstrap2.RData")
+save(param_bootstrap, file = "param_bootstrap.RData")
