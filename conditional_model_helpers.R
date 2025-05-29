@@ -92,7 +92,7 @@ Y_NLL <- function(theta,df=Y_given1extreme,given=1,sim=2,a_hat=NULL,b_hat=NULL,b
   sig <- theta[length(theta)]
   Y1 <- df %>% dplyr::select(paste0("Y",given)) %>% pull()
   Y2 <- df %>% dplyr::select(paste0("Y",sim)) %>% pull()
-  if (a<(-1) | a>1 | b<0 | b>=b_max | sig<0) {
+  if (a<(-1) | a>1 | b<(-10) | b>=b_max | sig<0) {
     log_lik <- (10^6) # low log-likelihood outside Keef bounds
   }
   else {
