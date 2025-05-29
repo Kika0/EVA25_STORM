@@ -33,7 +33,7 @@ sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_mo
   ## Reading in required packages
   d <- 25
   v <- qlaplace(q)
-  Nsim <- sum(apply(Yboot$Y, 1, max) > v)*Nrun
+  Nsim <- sum(apply(Y_boot$Y, 1, max) > v)*Nrun
   n_sim <- Nsim*10
   required_pckgs <- c("Matrix", "LaplacesDemon")
   t(t(sapply(required_pckgs, require, character.only = TRUE)))
@@ -102,7 +102,7 @@ sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_mo
   ## Above simulated Y(s) | max(Y(s)) > v
   ## We want to get the unconditioned process
   ## First get the data points where we have no extremes
-  data_Laplace <- Yrun1Lap
+  data_Laplace <- Y_boot$Y
   Index_No_Extremes <- which(apply(data_Laplace, 1, max) < v)
   Data_Body_Laplace <- data_Laplace[Index_No_Extremes,]
   
