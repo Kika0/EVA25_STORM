@@ -175,7 +175,7 @@ par_est <- function(df=sims,v=0.99,given=c(1),margin="Normal",method="sequential
         if (2 %in% keef_constraints) {
           b_max2 <- optim(par=0.8,fn = keef_constraint2,a=a_hat[length(a_hat)],Y1=Y1,Y2=Y2,control = list(maxit=2000),lower=0, upper=1, method = "Brent")$par
         } else {b_max2 <- 1} 
-        b_max <- min(b_max1,b_max2)
+        b_max <- min(b_max1,b_max2) + 10^(-6)
         bmax <- append(bmax,b_max)
         init_parb <- c(b_max/2,0,1)
         optb <- optim(par=init_parb,fn = Y_NLL,df=Y_given1extreme,given=j,sim=res[i-1],a_hat=opta$par[1],b_max=b_max,control = list(maxit=2000), method = "Nelder-Mead")
