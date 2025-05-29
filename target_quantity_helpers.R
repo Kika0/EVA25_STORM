@@ -39,12 +39,6 @@ Q2 <- function(Yrun,threshold=5.7) {
   sum(rowSums(Yrun > threshold) >= 6)
 }
 
-Q3old <- function(Yrun,threshold=5) {
-  str_count(paste(c(0, 0, apply(X = Yrun > threshold, MARGIN = 1, sum) >= 3,0,0),
-            collapse = ""),
-            pattern = "110")
-}
-
 Q3 <- function(Yrun, threshold = 5){
   ## Number of times at least three sites exceed the threshold
   excesses <- rowSums(Yrun > threshold) >= 3
