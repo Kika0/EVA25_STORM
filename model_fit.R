@@ -28,6 +28,16 @@ load("runs/run4.RData")
 # obtain bootstrap using model refitting -----
 model_refit <- function(k) {
 source("Block_Bootstrapping.R")
+  tq_table <- list()
+  for (run_number in 1:4) {
+  start_time <- Sys.time()
+  Y_Bootstrapped <- NonSta_GPD_to_Lapalce(df = data,
+                                          run = run_number,
+                                          tau = 0.98,
+                                          B = 1,
+                                          l = 2)
+  end_time <- Sys.time()
+  end_time - start_time
 Yboot <- Y_Bootstrapped[[1]]
 names(Yboot$Y) <- paste0("Y",1:25)
 Yboot$Y <- as.data.frame(Yboot$Y)
@@ -56,8 +66,9 @@ y <- Qeval(sims)
 # 
 # v <- seq(2,5,by=0.5)
 # q3 <- rbind(sapply(X = v, FUN = Q3, Yrun = sims))
- return(list(y))
 }
+ return(list(y))
+
 
 # evaluate target quantities for all 6 questions (preliminary+target)
 tq <- replicate(Nrun,expr = simulate_evaluate(x="AGG_vinecopula"), simplify=TRUE)
@@ -87,9 +98,11 @@ names(temp) <- names(tq[[1]])
   # print in latex table
   tq_table <- cbind(data.frame("Residual method" = c("empirical","vine copula")),
                     rbind(temp,tvc))
-
+tq_table_run[[run_number]] <- tq_table 
+}
   # maybe add model diagnostics
-  return(list(tq_table))
+  return(list(tq_table_run))
+  
 }
 
 d = 25
