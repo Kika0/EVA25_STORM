@@ -187,13 +187,6 @@ NonSta_GPD_to_Lapalce <- function(df, run, tau, B, l){
   return(Boot_Out)
 }
 
-start_time <- Sys.time()
-Y_Bootstrapped <- NonSta_GPD_to_Lapalce(df = data,
-                                        run = 1,
-                                        tau = 0.98,
-                                        B = 1,
-                                        l = 2)
-end_time <- Sys.time()
-end_time - start_time
+
 
 
