@@ -28,7 +28,7 @@ load("runs/run4.RData")
 # obtain bootstrap using model refitting -----
 model_refit <- function(k) {
 source("Block_Bootstrapping.R")
-  tq_table <- list()
+  tq_table_run <- list()
   for (run_number in 1:4) {
   start_time <- Sys.time()
   Y_Bootstrapped <- NonSta_GPD_to_Lapalce(df = data,
@@ -41,11 +41,13 @@ source("Block_Bootstrapping.R")
 Yboot <- Y_Bootstrapped[[1]]
 names(Yboot$Y) <- paste0("Y",1:25)
 Yboot$Y <- as.data.frame(Yboot$Y)
+
   cond_model_fit_wrapper = function(i){
     return(fn(site_index=i,v=q,Yrun1Lap =Yboot$Y,res_dist = "AGG_vinecopula"))
   }
   cond_modelvc1 <- sapply(1:25,cond_model_fit_wrapper,simplify=FALSE)
-  
+  end_time <- Sys.time()
+  end_time - start_time 
   Nrun <- 50
   # # simulate from cond. model with AGG_vinecopula residuals
   # boot <- replicate(n = Nrun, expr = sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula",Y_boot=Yboot), simplify = FALSE)
@@ -66,9 +68,9 @@ y <- Qeval(sims)
 # 
 # v <- seq(2,5,by=0.5)
 # q3 <- rbind(sapply(X = v, FUN = Q3, Yrun = sims))
-}
- return(list(y))
 
+ return(list(y))
+}
 
 # evaluate target quantities for all 6 questions (preliminary+target)
 tq <- replicate(Nrun,expr = simulate_evaluate(x="AGG_vinecopula"), simplify=TRUE)
@@ -100,8 +102,8 @@ names(temp) <- names(tq[[1]])
                     rbind(temp,tvc))
 tq_table_run[[run_number]] <- tq_table 
 }
-  # maybe add model diagnostics
-  return(list(tq_table_run))
+  # return a list of lists
+  return(tq_table_run)
   
 }
 
