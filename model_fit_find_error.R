@@ -108,7 +108,7 @@ model_refit <- function(k) {
 d = 25
 q = 0.95 # quantile threshold for fitting the conditional model
 Nboot = 10
-model_refit(1)
-#param_bootstrap = mclapply(1:Nboot, model_refit, mc.cores = 2)
+#model_refit(1)
+param_bootstrap = mclapply(1:Nboot, model_refit, mc.cores = 2)
 
 
