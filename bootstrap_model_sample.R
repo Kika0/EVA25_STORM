@@ -44,9 +44,21 @@ load("runs/run4.RData")
     }
     cond_modelvc1 <- sapply(1:25,cond_model_fit_wrapper,simplify=FALSE)
     
-    Nrun <- 1
-    sims_vc <- sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula",Y_boot=Yboot)
-    sims_emp <- sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "empirical",Y_boot=Yboot)
+Nrun <- 1
+sims_vc <- sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula",Y_boot=Yboot)
+sims_emp <- sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "empirical",Y_boot=Yboot)
     
-    save(Yboot,cond_modelvc1,sims_vc,sims_emp,file="../run1_bootstrap_resfit.RData")
-    
+save(Yboot,cond_modelvc1,sims_vc,sims_emp,file="../run1_bootstrap_resfit.RData")
+
+# load to also save on other margins
+load("../run1_bootstrap_resfit.RData")
+set.seed(1234)
+sims_vc <- sim_cond_model(seed=1234,Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula",Y_boot=Yboot)
+# comment out temporal reordering and run again
+set.seed(1234)
+sims_notemp <- sim_cond_model(seed=1234,Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula",Y_boot=Yboot)
+# save
+save(Yboot,cond_modelvc1,sims_vc,sims_notemp,file="../run1_bootstrap_resfit.RData")
+
+
+        
