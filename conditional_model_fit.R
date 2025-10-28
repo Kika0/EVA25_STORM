@@ -29,7 +29,8 @@ fn <- function(site_index=1,v=0.95,Yrun1Lap=Yboot$Y,res_dist="empirical") {
   }
 }
 
-sim_cond_model <- function(Nrun=1,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_model=cond_model,Y_boot=Yboot) {
+sim_cond_model <- function(Nrun=1,seed=NULL,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_model=cond_model,Y_boot=Yboot) {
+  if (is.numeric(seed)) {set.seed(seed)}
   ## Reading in required packages
   d <- 25
   v <- qlaplace(q)
@@ -137,11 +138,13 @@ Data_orig_margins <- sapply(1:25, function(i){
                                      scale = Y_boot$par[i,4:6],
                                      shape = Y_boot$par[i,7]))
                     })
+
+
   
  # names(Data_orig_margins) <- names(Data_Final_Laplace_Margins)
   
   return(as.data.frame( Data_orig_margins))
-  #  return(final_uniform_data)
+    #return(final_uniform_data)
 }
 
 cond_model_fit_wrapper = function(i){
