@@ -30,6 +30,7 @@ model_refit <- function(k) {
 source("Block_Bootstrapping.R")
   tq_table_run <- list()
   for (run_number in 1:4) {
+  set.seed(k*100+run_number)
   start_time <- Sys.time()
   Y_Bootstrapped <- NonSta_GPD_to_Lapalce(df = data,
                                           run = run_number,
@@ -45,6 +46,7 @@ Yboot$Y <- as.data.frame(Yboot$Y)
   cond_model_fit_wrapper = function(i){
     return(fn(site_index=i,v=q,Yrun1Lap =Yboot$Y,res_dist = "AGG_vinecopula"))
   }
+  start_time <- Sys.time()
   cond_modelvc1 <- sapply(1:25,cond_model_fit_wrapper,simplify=FALSE)
   end_time <- Sys.time()
   end_time - start_time 
@@ -73,7 +75,11 @@ y <- Qeval(sims)
 }
 
 # evaluate target quantities for all 6 questions (preliminary+target)
+start_time <- Sys.time()
 tq <- replicate(Nrun,expr = simulate_evaluate(x="AGG_vinecopula"), simplify=TRUE)
+end_time <- Sys.time()
+end_time - start_time
+
 tq_matrix <- unlist(tq) %>% matrix(nrow=Nrun, byrow=TRUE)
 
 # sum and divide by Nrun
