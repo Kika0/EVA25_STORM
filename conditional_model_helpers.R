@@ -165,7 +165,7 @@ par_est <- function(df=sims,v=0.99,given=c(1),margin="Normal",method="sequential
       Y1 <- Y_given1extreme[,j]
       Y2 <- Y_given1extreme[,res[i-1]]
       if (method=="sequential2") {
-        init_para <- c(0.8,0,1)
+        init_para <- c(0.5,0,1)
         opta <- optim(par=init_para,fn = Y_NLL,df=Y_given1extreme,given=j,sim=res[i-1],b_hat=0,control = list(maxit=2000))
         a_hat <- append(a_hat,opta$par[1])
         lika <- append(lika,opta$value)
