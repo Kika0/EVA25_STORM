@@ -25,11 +25,47 @@ load("runs/run2.RData")
 load("runs/run3.RData")
 load("runs/run4.RData")
 
+d = 25
+q = 0.95 # quantile threshold for fitting the conditional model
+Nboot = 50
+k <- 58
+
+fn <- function(site_index=1,v=0.95,Yrun1Lap=Yboot$Y,res_dist="empirical") {
+  j <- site_index
+  pe_cond1 <- par_est(df=Yrun1Lap,v=v,given=j,keef_constraints = c(1,2))
+  # calculate a vector of observed residuals
+  Y_given1extreme <- Yrun1Lap %>% dplyr::filter(Yrun1Lap[,j]>quantile(Yrun1Lap[,j],v))
+  Z <- as.data.frame(matrix(nrow=nrow(Y_given1extreme),ncol=0))
+  Y1 <- Y_given1extreme[,j]
+  res <- c(1:ncol(Y_given1extreme))[-j]
+  for (i in 2:ncol(Y_given1extreme)) {
+    Y2 <- Y_given1extreme[,res[i-1]]
+    Z <- cbind(Z,data.frame("Z"= (Y2-pe_cond1$a[i-1]*Y1)/(Y1^pe_cond1$b[i-1]) ) )
+  }
+  names(Z) <- paste0("Z",res)
+  
+  if (res_dist=="empirical") {
+    return(list(pe_cond1,Z))
+  }
+  if (res_dist=="AGG_vinecopula") {
+    # 3a. estimate parameters for AGG residual margins
+    res_margin <- res_margin_par_est(obs_res=Z,method = "AGG")
+    # transform to AGG margins
+    pAGG_wrapper <- function (i) {
+      pAGG(x=Z[i],theta=as.numeric(unlist(res_margin[i,2:6])))
+    }
+    Z_AGG <- sapply(1:ncol(Z),FUN=pAGG_wrapper)
+    # 3b. fit a vine copula
+    # res_vc <- rvinecopulib::vinecop( Z_AGG,selcrit = "mbicv")  
+    return(list(pe_cond1,Z,res_margin))
+  }
+}
+
 
 # obtain bootstrap using model refitting -----
-model_refit <- function(k) {
   source("Block_Bootstrapping.R")
   tq_table_run <- list()
+  cond_modelvc1 <- list()
   for (run_number in 1:4) {
     set.seed(k*100+run_number)
     start_time <- Sys.time()
@@ -39,76 +75,17 @@ model_refit <- function(k) {
                                             B = 1,
                                             l = 2)
     end_time <- Sys.time()
-    end_time - start_time
+  print(end_time - start_time )
     Yboot <- Y_Bootstrapped[[1]]
     names(Yboot$Y) <- paste0("Y",1:25)
     Yboot$Y <- as.data.frame(Yboot$Y)
     
     cond_model_fit_wrapper = function(i){
-      return(fn(site_index=i,v=q,Yrun1Lap =Yboot$Y,res_dist = "empirical"))
+      return(fn(site_index=i,v=q,Yrun1Lap =Yboot$Y,res_dist = "AGG_vinecopula"))
     }
     start_time <- Sys.time()
-    cond_modelvc1 <- sapply(1:25,cond_model_fit_wrapper,simplify=FALSE)
+    cond_modelvc1[[run_number]] <- sapply(1:25,cond_model_fit_wrapper,simplify=FALSE)
     end_time <- Sys.time()
-    end_time - start_time 
-    Nrun <- 1
-    # # simulate from cond. model with AGG_vinecopula residuals
-    # boot <- replicate(n = Nrun, expr = sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = "AGG_vinecopula",Y_boot=Yboot), simplify = FALSE)
-    # # evaluate target quantities for all 6 questions (preliminary+target)
-    # tq <- do.call(rbind,lapply(bootemp,FUN = Qeval))
-    # # sum and divide by Nrun
-    # temp <- apply(tq,MARGIN=2,FUN=sum)/Nrun
-    
-    # simulate and evaluate in one function
-    simulate_evaluate <- function(x="AGG_vinecopula") {
-      sims <- sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = x,Y_boot=Yboot)
-      y <- Qeval(sims)
-      # v <- seq(1, 1.7, by = 0.1)
-      # q1 <- rbind(sapply(X = v, FUN = Q1, Yrun = sims))
-      # 
-      # v <- seq(2.1,5.7,by=0.6)
-      # q2 <- rbind(sapply(X = v, FUN = Q2, Yrun = sims))
-      # 
-      # v <- seq(2,5,by=0.5)
-      # q3 <- rbind(sapply(X = v, FUN = Q3, Yrun = sims))
-      
-      return(list(y))
-    }
-    
-    # evaluate target quantities for all 6 questions (preliminary+target)
-    start_time <- Sys.time()
-    tq <- replicate(Nrun,expr = simulate_evaluate(x="empirical"), simplify=TRUE)
-    end_time <- Sys.time()
-    end_time - start_time
-    
-    tq_matrix <- unlist(tq) %>% matrix(nrow=Nrun, byrow=TRUE)
-    
-    # sum and divide by Nrun
-    tq_means <- apply(tq_matrix,MARGIN=2,FUN=sum)/Nrun
-    tvc <- data.frame(matrix(tq_means, 1))
-    names(tvc) <- names(tq[[1]])
-    
-    # # simulate from cond.model with empirical residuals
-    # bootemp <- replicate(n = Nrun, expr = sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1e,res_dist = "empirical",Y_boot=Yboot), simplify = FALSE)
-    # # evaluate target quantities for all 6 questions (preliminary+target)
-    # tq <- do.call(rbind,lapply(boot,FUN = Qeval))
-    # # sum and divide by Nrun
-    # tvc <- apply(tq,MARGIN=2,FUN=sum)/Nrun
-    
-    # print in latex table
-    tq_table <- cbind(data.frame("Residual method" = c("empirical","vine copula")),
-                      rbind(temp,tvc))
-    tq_table_run[[run_number]] <- tq_table 
-  }
-  # return a list of lists
-  return(tq_table_run)
-  
+  print(  end_time - start_time )
 }
-
-d = 25
-q = 0.95 # quantile threshold for fitting the conditional model
-Nboot = 10
-#model_refit(1)
-param_bootstrap = mclapply(1:Nboot, model_refit, mc.cores = 2)
-
 
