@@ -40,6 +40,17 @@ source("Block_Bootstrapping.R")
   end_time <- Sys.time()
   end_time - start_time
 Yboot <- Y_Bootstrapped[[1]]
+while (sum(is.infinite(as.numeric(unlist(Yboot$Y))))>=1) {
+  start_time <- Sys.time()
+  Y_Bootstrapped <- NonSta_GPD_to_Lapalce(df = data,
+                                          run = run_number,
+                                          tau = 0.98,
+                                          B = 1,
+                                          l = 2)
+  end_time <- Sys.time()
+  end_time - start_time
+  Yboot <- Y_Bootstrapped[[1]]
+}
 names(Yboot$Y) <- paste0("Y",1:25)
 Yboot$Y <- as.data.frame(Yboot$Y)
 
