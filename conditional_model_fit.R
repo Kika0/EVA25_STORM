@@ -27,9 +27,26 @@ fn <- function(site_index=1,v=0.95,Yrun1Lap=Yboot$Y,res_dist="empirical") {
     res_vc <- rvinecopulib::vinecop( Z_AGG,selcrit = "mbicv")  
     return(list(pe_cond1,Z,res_margin,res_vc))
   }
+  
+  if (res_dist=="AGG_Gauscopula") {
+    # 3a. estimate parameters for AGG residual margins
+    res_margin <- res_margin_par_est(obs_res=Z,method = "AGG")
+    
+    ## First transform the data onto standard Gaussian margins
+      pAGG_wrapper <- function (i) {
+        qnorm(pmin(rep(0.9999999,length(Z[,i])),pAGG(x=Z[i],theta=as.numeric(unlist(res_margin[i,2:6]))) ,na.rm=TRUE) )
+      }
+      Z_Gaussian <- sapply(1:ncol(Z),FUN=pAGG_wrapper)
+      
+       GausCop <- cor(Z_Gaussian)
+    
+#x <- fit_agg(data=data.matrix(Z)) 
+ #x <- optim(par=list(0,1,1,1,1,diag(24)),fn=dmvagg,data=data.matrix(Z),method="SANN")$par
+     return(list(pe_cond1,Z,res_margin,GausCop))
+  }
 }
 
-sim_cond_model <- function(Nrun=1,seed=NULL,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_model=cond_model,Y_boot=Yboot) {
+sim_cond_model <- function(Nrun=1,seed=NULL,Yrun=Yrun1,q=0.95,res_dist="empirical",cond_model=cond_model,Y_boot=Yboot,return_Laplace=FALSE,include_temporal=TRUE) {
   if (is.numeric(seed)) {set.seed(seed)}
   ## Reading in required packages
   d <- 25
@@ -68,6 +85,23 @@ sim_cond_model <- function(Nrun=1,seed=NULL,Yrun=Yrun1,q=0.95,res_dist="empirica
     # transform a vector of residuals for each of the 25 models  
     Z_sample <- lapply(cond_sites_unique, function(i){
       sapply(1:ncol(Zsim_unif[[i]]), AGG_inverse_wrapper,i=i)})
+  } # end of simulating from AGG_vinecopula residual distribution
+  else if (res_dist=="AGG_Gauscopula") {
+    # AGG parameters
+    AGGpar <- lapply(cond_model, function(x){x[[3]]})
+    # vine copula objects
+    Resid_vc <- lapply(cond_model, function(x){x[[4]]})
+    # 2. simulate residuals from a vine copula
+    Zsim_norm<- lapply(cond_sites_unique, function(i){
+      rmvn(n=n_cond_sites[i],mu=rep(0,(d-1)),Sigma=Resid_vc[[i]])})
+    # 3. convert to original margins
+    # rewrite using apply
+    AGG_inverse_wrapper <- function(i,j){
+      return( qAGG(p=pmin(rep(0.99999999,length(as.numeric(unlist(Zsim_norm[[i]][,j])))), pnorm(as.numeric(unlist(Zsim_norm[[i]][,j]))), na.rm = TRUE),theta=as.numeric(unlist(AGGpar[[i]][j,2:6]))))
+    }
+    # transform a vector of residuals for each of the 25 models  
+    Z_sample <- lapply(cond_sites_unique, function(i){
+      sapply(1:ncol(Zsim_norm[[i]]), AGG_inverse_wrapper,i=i)})
   } # end of simulating from AGG_vinecopula residual distribution
   
   ## Convert the simulated data onto Laplace margins
@@ -127,7 +161,9 @@ sim_cond_model <- function(Nrun=1,seed=NULL,Yrun=Yrun1,q=0.95,res_dist="empirica
 # reorder the data
 ordering <- rank(rowSums(apply(Y_boot$X, 2, rank))) ## Y_boot$X blocked bootstrapped data
 
+if (include_temporal==TRUE) {
 final_uniform_data <- final_uniform_data[ordering,] ## reorder for temporal ordering
+}
 
 ## Obtain the data on the original margins
 Data_orig_margins <- sapply(1:25, function(i){
@@ -142,8 +178,11 @@ Data_orig_margins <- sapply(1:25, function(i){
 
   
  # names(Data_orig_margins) <- names(Data_Final_Laplace_Margins)
-  
+  if (return_Laplace==FALSE) {
   return(as.data.frame( Data_orig_margins))
+  } else {
+    return(as.data.frame(Data_Final_Laplace_Margins))
+  }
     #return(final_uniform_data)
 }
 
