@@ -30,7 +30,7 @@ model_refit <- function(k) {
 source("Block_Bootstrapping.R")
   tq_table_run <- list()
   for (run_number in 1:4) {
-  set.seed(k*100+run_number)
+  set.seed(k*100+run_number+10)
   start_time <- Sys.time()
   Y_Bootstrapped <- NonSta_GPD_to_Lapalce(df = data,
                                           run = run_number,
@@ -71,7 +71,7 @@ Yboot$Y <- as.data.frame(Yboot$Y)
   
 # simulate and evaluate in one function
 simulate_evaluate <- function(x="AGG_vinecopula") {
- sims <- sim_cond_model(Yrun=Yboot$Y,cond_model=cond_modelvc1,res_dist = x,Y_boot=Yboot)
+ sims <- sim_cond_model(Yrun=Yboot$Y,q=q,cond_model=cond_modelvc1,res_dist = x,Y_boot=Yboot)
 y <- Qeval(sims)
 # v <- seq(1, 1.7, by = 0.1)
 # q1 <- rbind(sapply(X = v, FUN = Q1, Yrun = sims))
@@ -125,8 +125,8 @@ tq_table_run[[run_number]] <- tq_table
 }
 
 d = 25
-q = 0.95 # quantile threshold for fitting the conditional model
-Nboot = 2
+q = 0.9 # quantile threshold for fitting the conditional model
+Nboot = 120
 # model_refit(1)
 param_bootstrap = mclapply(1:Nboot, model_refit, mc.cores = 2)
 
